@@ -9,18 +9,18 @@ services:
   # Aspire Dashboard
   aspire:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:latest
-    container_name: obs-aspire-container
+    container_name: obs101-aspire-container
     environment:
       - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
     ports:
       - "18888:18888"
-      - "14317:18889"
+      - "4317:18889"
 
   # Database server
   postgres:
     image: postgres:17-alpine
     restart: on-failure
-    container_name: obs-postgres-container
+    container_name: obs101-postgres-container
     volumes:
       - ./database/postgres-data:/var/lib/postgresql/data    
     ports:

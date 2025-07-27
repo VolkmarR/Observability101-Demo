@@ -1,6 +1,10 @@
 using Scalar.AspNetCore;
+using Observability101.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add OpenTelemetry configuration
+builder.AddObservability();
 
 builder.Services.AddOpenApi();
 builder.Services.AddFastEndpoints().SwaggerDocument();
@@ -11,6 +15,8 @@ var app = builder.Build();
 // For demo purposes, Scaler and OpenApi are always enabled. Don't do this in production!
 app.MapOpenApi();
 app.MapScalarApiReference();
+
+app.MapGet("/", () => "Hello world!");
 
 // var summaries = new[]
 // {
