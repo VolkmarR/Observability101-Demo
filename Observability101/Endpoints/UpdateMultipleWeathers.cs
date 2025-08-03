@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-
-namespace Observability101.Endpoints;
+﻿namespace Observability101.Endpoints;
 
 public class UpdateMultipleWeathersRequest
 {
@@ -22,11 +20,11 @@ public class UpdateMultipleWeathersResponseItem
 
 public class UpdateMultipleWeathers : Endpoint<UpdateMultipleWeathersRequest, UpdateMultipleWeatherResponse>
 {
-    private readonly HttpClient _httpClient;
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public UpdateMultipleWeathers(HttpClient httpClient)
+    public UpdateMultipleWeathers(IHttpClientFactory httpClientFactory)
     {
-        _httpClient = httpClient;
+        _httpClientFactory = httpClientFactory;
     }
 
     public override void Configure()
@@ -48,7 +46,10 @@ public class UpdateMultipleWeathers : Endpoint<UpdateMultipleWeathersRequest, Up
 
     private async Task<UpdateMultipleWeathersResponseItem> UpdateSingleWeather(string city, CancellationToken ct)
     {
-        var response = await _httpClient.PostAsJsonAsync("/api/weather", new UpdateWeatherRequest { City = city }, ct);
+        var client = _httpClientFactory.CreateClient();
+        client.BaseAddress = new Uri(BaseURL);
+
+        var response = await client.PostAsJsonAsync("/api/weather", new UpdateWeatherRequest { City = city }, ct);
         var result = await response.Content.ReadFromJsonAsync<UpdateWeatherResponse>(cancellationToken: ct);
         return new UpdateMultipleWeathersResponseItem
         {
