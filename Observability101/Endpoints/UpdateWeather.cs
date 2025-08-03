@@ -1,4 +1,8 @@
-﻿namespace Observability101.Endpoints;
+﻿using Microsoft.EntityFrameworkCore;
+using Observability101.Database;
+using Observability101.Extensions;
+
+namespace Observability101.Endpoints;
 
 public class UpdateWeatherRequest
 {
@@ -12,7 +16,7 @@ public class UpdateWeatherResponse
     public decimal Temperature { get; set; }
 }
 
-public class UpdateWeather : Endpoint<UpdateWeatherRequest, UpdateWeatherResponse>
+public class UpdateWeather(ApplicationDbContext context) : Endpoint<UpdateWeatherRequest, UpdateWeatherResponse>
 {
     public override void Configure()
     {
@@ -22,13 +26,32 @@ public class UpdateWeather : Endpoint<UpdateWeatherRequest, UpdateWeatherRespons
 
     public override async Task HandleAsync(UpdateWeatherRequest req, CancellationToken ct)
     {
-        var now = DateTime.Now;
-        var normalizedNow = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
-        
-        await Send.OkAsync(new()
+        var normalizedNow = DateTime.UtcNow.TruncateTimeToMinute();
+
+        var temperature = await context.Weather
+            .Where(q => q.City == req.City && q.Timestamp == normalizedNow)
+            .Select(q => (decimal?)q.Temperature)
+            .FirstOrDefaultAsync(ct);
+
+        if (temperature is null)
+        {
+            temperature = Random.Shared.Next(-20, 40);
+            await context.Weather.AddAsync(new Weather
             {
-                City = req.City, TimeStamp = normalizedNow, Temperature = 20.5m,
-            }
-            , ct);
+                City = req.City,
+                Timestamp = normalizedNow,
+                Temperature = temperature.Value
+            }, ct);
+            await context.SaveChangesAsync(ct);
+        }
+
+        await Send.OkAsync(
+            new UpdateWeatherResponse
+            {
+                City = req.City,
+                TimeStamp = normalizedNow,
+                Temperature = temperature.Value,
+            },
+            ct);
     }
 }

@@ -10,7 +10,6 @@ public class UpdateMultipleWeatherResponse
     public required List<UpdateMultipleWeathersResponseItem> Weathers { get; set; }
 }
 
-
 public class UpdateMultipleWeathersResponseItem
 {
     public required string City { get; set; }
@@ -18,15 +17,9 @@ public class UpdateMultipleWeathersResponseItem
     public decimal Temperature { get; set; }
 }
 
-public class UpdateMultipleWeathers : Endpoint<UpdateMultipleWeathersRequest, UpdateMultipleWeatherResponse>
+public class UpdateMultipleWeathers(IHttpClientFactory httpClientFactory)
+    : Endpoint<UpdateMultipleWeathersRequest, UpdateMultipleWeatherResponse>
 {
-    private readonly IHttpClientFactory _httpClientFactory;
-
-    public UpdateMultipleWeathers(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
-
     public override void Configure()
     {
         Post("/api/weather/multiple");
@@ -46,7 +39,7 @@ public class UpdateMultipleWeathers : Endpoint<UpdateMultipleWeathersRequest, Up
 
     private async Task<UpdateMultipleWeathersResponseItem> UpdateSingleWeather(string city, CancellationToken ct)
     {
-        var client = _httpClientFactory.CreateClient();
+        var client = httpClientFactory.CreateClient();
         client.BaseAddress = new Uri(BaseURL);
 
         var response = await client.PostAsJsonAsync("/api/weather", new UpdateWeatherRequest { City = city }, ct);
