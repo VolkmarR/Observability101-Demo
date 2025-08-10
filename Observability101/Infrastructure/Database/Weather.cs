@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Observability101.Database;
+namespace Observability101.Infrastructure.Database;
 
 public class Weather
 {

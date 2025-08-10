@@ -1,14 +1,16 @@
-using Observability101.Configuration;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
-using Observability101.Database;
+using Observability101.Infrastructure.Database;
+using Observability101.Infrastructure.Devices;
+using Observability101.OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add OpenTelemetry configuration
 builder.AddObservability();
 
-// Add Database Context
+// Add Database Context and Temperature sensor reader
+builder.Services.AddTransient<ITemperatureSensorReader, FakeTemperatureSensorReader>();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -28,7 +30,6 @@ builder.Services.AddSwaggerGen(c =>
 // Build the application
 var app = builder.Build();
 
-
 // Make sure the database is always deleted and re-created with the correct schema.
 // This is only for demo purposes. Don't do this in production!
 using (var scope = app.Services.CreateScope())
@@ -38,7 +39,7 @@ using (var scope = app.Services.CreateScope())
     dbContext.Database.EnsureCreated();
 }
 
-// For demo purposes, Scaler and OpenApi are always enabled. Don't do this in production!
+// For demo purposes, Swagger and OpenApi are always enabled. Don't do this in production!
 app.MapOpenApi();
 app.UseSwaggerUI(c =>
 {
