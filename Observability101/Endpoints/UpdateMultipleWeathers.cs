@@ -33,8 +33,8 @@ public class UpdateMultipleWeathers(IHttpClientFactory httpClientFactory)
     /// </summary>
     public override async Task HandleAsync(UpdateMultipleWeathersRequest req, CancellationToken ct)
     {
-        var results = await UpdateWeathersSimple(req.Cities, ct);
-        // var results = await UpdateWeathersOptimized(req.Cities, ct);
+        // var results = await UpdateWeathersSimple(req.Cities, ct);
+        var results = await UpdateWeathersOptimized(req.Cities, ct);
 
         await Send.OkAsync(new UpdateMultipleWeatherResponse
         {
