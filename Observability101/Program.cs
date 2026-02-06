@@ -2,8 +2,12 @@ using Microsoft.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Observability101.Infrastructure.Database;
 using Observability101.Infrastructure.Devices;
+using Observability101.OpenTelemetry;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add OpenTelemetry configuration
+builder.AddObservability();
 
 // Add Database Context and Temperature sensor reader
 builder.Services.AddTransient<ITemperatureSensorReader, FakeTemperatureSensorReader>();
