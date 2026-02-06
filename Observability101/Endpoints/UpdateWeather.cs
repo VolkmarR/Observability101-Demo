@@ -1,5 +1,6 @@
 ﻿// ReSharper disable PropertyCanBeMadeInitOnly.Global
 
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Observability101.Extensions;
 using Observability101.Infrastructure.Database;
@@ -42,6 +43,9 @@ public class UpdateWeather(ApplicationDbContext context, ITemperatureSensorReade
             .Where(q => q.City == req.City && q.Timestamp == normalizedNow)
             .Select(q => (decimal?)q.Temperature)
             .FirstOrDefaultAsync(ct);
+
+        // Add a custom tag that shows if the request was handled used a cached temperature or not
+        Activity.Current?.AddTag("custom.cached", temperature is not null);
 
         // If the temperature is null, use the sensor reader (fake) to read the temperature and save it in the db
         if (temperature is null)
